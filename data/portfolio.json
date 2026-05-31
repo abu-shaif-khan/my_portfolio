@@ -1,0 +1,370 @@
+{
+  "hero": {
+    "name": "Abu Shaif Khan",
+    "title": "IT & Network Specialist",
+    "tagline": "Designing Secure, Scalable, and High-Performance IT Infrastructure.",
+    "description": "Experienced IT & Network Specialist with expertise in enterprise networking, system administration, cybersecurity, cloud infrastructure, and IT operations. Passionate about delivering reliable, secure, and efficient technology solutions for modern businesses.",
+    "photoUrl": "",
+    "counters": {
+      "experience": "3+",
+      "projects": "100+",
+      "deployments": "50+",
+      "uptime": "99.9%"
+    },
+    "socials": {
+      "linkedin": "https://linkedin.com/in/abu-shaif-khan",
+      "github": "https://github.com/abu-shaif-khan",
+      "email": "abu.shaif.khan@gmail.com"
+    },
+    "resumeUrl": "/uploads/upload-327e0a226dd62311.pdf"
+  },
+  "skills": [
+    {
+      "id": "net-1",
+      "category": "Networking",
+      "name": "Cisco Networking",
+      "level": 95
+    },
+    {
+      "id": "net-2",
+      "category": "Networking",
+      "name": "Routing & Switching",
+      "level": 92
+    },
+    {
+      "id": "net-3",
+      "category": "Networking",
+      "name": "TCP/IP & Subnetting",
+      "level": 96
+    },
+    {
+      "id": "net-4",
+      "category": "Networking",
+      "name": "VLAN & Trunking",
+      "level": 90
+    },
+    {
+      "id": "net-5",
+      "category": "Networking",
+      "name": "VPN (IPsec, SSL)",
+      "level": 88
+    },
+    {
+      "id": "net-6",
+      "category": "Networking",
+      "name": "BGP & OSPF Routing",
+      "level": 85
+    },
+    {
+      "id": "net-7",
+      "category": "Networking",
+      "name": "Wireless Networks",
+      "level": 87
+    },
+    {
+      "id": "sys-1",
+      "category": "System Administration",
+      "name": "Windows Server",
+      "level": 90
+    },
+    {
+      "id": "sys-2",
+      "category": "System Administration",
+      "name": "Active Directory & GPO",
+      "level": 92
+    },
+    {
+      "id": "sys-3",
+      "category": "System Administration",
+      "name": "DNS & DHCP Servers",
+      "level": 94
+    },
+    {
+      "id": "sys-4",
+      "category": "System Administration",
+      "name": "Linux Administration",
+      "level": 85
+    },
+    {
+      "id": "cld-1",
+      "category": "Cloud Technologies",
+      "name": "AWS (VPC, EC2, S3, IAM)",
+      "level": 86
+    },
+    {
+      "id": "cld-2",
+      "category": "Cloud Technologies",
+      "name": "Microsoft Azure",
+      "level": 84
+    },
+    {
+      "id": "cld-3",
+      "category": "Cloud Technologies",
+      "name": "Google Cloud Platform",
+      "level": 78
+    },
+    {
+      "id": "cld-4",
+      "category": "Cloud Technologies",
+      "name": "Cloud Infrastructure",
+      "level": 85
+    },
+    {
+      "id": "sec-1",
+      "category": "Firewall",
+      "name": "Firewall Management (Fortinet & Cisco)",
+      "level": 89
+    },
+    {
+      "id": "sec-2",
+      "category": "Firewall",
+      "name": "IDS/IPS & Threat Prevention",
+      "level": 85
+    },
+    {
+      "id": "sec-3",
+      "category": "Firewall",
+      "name": "Endpoint Security",
+      "level": 88
+    },
+    {
+      "id": "sec-4",
+      "category": "Firewall",
+      "name": "Security Auditing & Hardening",
+      "level": 82
+    },
+    {
+      "id": "virt-1",
+      "category": "Virtualization",
+      "name": "VMware vSphere & ESXi",
+      "level": 90
+    },
+    {
+      "id": "virt-2",
+      "category": "Virtualization",
+      "name": "Microsoft Hyper-V",
+      "level": 84
+    },
+    {
+      "id": "virt-3",
+      "category": "Virtualization",
+      "name": "Proxmox VE",
+      "level": 80
+    },
+    {
+      "id": "mon-1",
+      "category": "Monitoring & Tools",
+      "name": "PRTG Network Monitor",
+      "level": 88
+    },
+    {
+      "id": "mon-2",
+      "category": "Monitoring & Tools",
+      "name": "Zabbix & Nagios",
+      "level": 85
+    },
+    {
+      "id": "mon-3",
+      "category": "Monitoring & Tools",
+      "name": "Wireshark Packet Analysis",
+      "level": 92
+    },
+    {
+      "id": "mon-4",
+      "category": "Monitoring & Tools",
+      "name": "SolarWinds NPM",
+      "level": 86
+    },
+    {
+      "id": "lang-1",
+      "category": "Programming Languages",
+      "name": "Python",
+      "level": 88
+    },
+    {
+      "id": "lang-2",
+      "category": "Programming Languages",
+      "name": "Bash & Shell Scripting",
+      "level": 90
+    },
+    {
+      "id": "lang-3",
+      "category": "Programming Languages",
+      "name": "PowerShell",
+      "level": 85
+    },
+    {
+      "id": "lang-4",
+      "category": "Programming Languages",
+      "name": "TypeScript / JavaScript",
+      "level": 75
+    },
+    {
+      "id": "da-1",
+      "category": "Data Analysis",
+      "name": "SQL",
+      "level": 85
+    },
+    {
+      "id": "da-2",
+      "category": "Data Analysis",
+      "name": "Pandas & NumPy",
+      "level": 80
+    },
+    {
+      "id": "da-3",
+      "category": "Data Analysis",
+      "name": "Excel (Advanced)",
+      "level": 90
+    },
+    {
+      "id": "ai-1",
+      "category": "AI Tools",
+      "name": "ChatGPT/OpenAI APIs",
+      "level": 90
+    },
+    {
+      "id": "ai-2",
+      "category": "AI Tools",
+      "name": "GitHub Copilot",
+      "level": 92
+    },
+    {
+      "id": "ai-3",
+      "category": "AI Tools",
+      "name": "Google Gemini",
+      "level": 88
+    }
+  ],
+  "experiences": [
+    {
+      "id": "exp-1",
+      "title": "Senior Network Engineer",
+      "company": "ABC Technologies",
+      "location": "Dhaka, Bangladesh",
+      "startDate": "March 2022",
+      "endDate": "Present",
+      "responsibilities": [
+        "Managed and maintained enterprise-wide network infrastructure, catering to over 500+ daily endpoints.",
+        "Configured and installed Cisco switches, Cisco routers, and Fortinet Firewalls to ensure zero unauthorized intrusion.",
+        "Designed and implemented secure corporate security policies, Active Directory structures, and group policies.",
+        "Reduced network system downtime by 40% through strict configurations of PRTG monitoring, routing failsafes, and VLAN zoning.",
+        "Administered virtual infrastructure hosted on VMware ESXi hosts and Windows Server Hyper-V environments."
+      ],
+      "technologies": [
+        "Cisco IOS",
+        "Fortinet",
+        "VMware ESXi",
+        "Windows Server",
+        "Active Directory",
+        "PRTG"
+      ],
+      "documentUrl": "https://drive.google.com/file/d/0B2s0R8uJcdyeTlFkVWxiWWhtMkZqZkZ0MzZQamQ0ZWNpLVBN/view?usp=drive_link&resourcekey=0-w8qtHtgmlK_mJdyQ6W64hw",
+      "logo": "/uploads/upload-a104b3a7ad2060f7.svg"
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "degree": "Bachelor of Science in Computer Science & Engineering",
+      "institution": "XYZ University",
+      "location": "Dhaka, Bangladesh",
+      "year": "2020",
+      "description": "Graduated with honors. Specialized in Computer Networking, Cryptography, and Advanced Database Systems. Active core member of the University IT Club."
+    },
+    {
+      "id": "edu-1780234477631",
+      "degree": "Master's in Computer Science",
+      "institution": "Rheinland-Pfälzische Technische Universität",
+      "location": "Kaiserslautern, Germany",
+      "year": "Incomplete (Thesis not finished)",
+      "description": "",
+      "logo": "/uploads/upload-5a20cb11f072d768.png"
+    }
+  ],
+  "certifications": [
+    {
+      "id": "cert-1",
+      "name": "Cisco Certified Network Associate (CCNA 200-301)",
+      "issuer": "Cisco",
+      "issueDate": "2021-08-15",
+      "credentialId": "CCNA-928374-ASK",
+      "verifyUrl": "https://www.credly.com/org/cisco/mark/ccna",
+      "badgeImage": "/uploads/upload-a66f35a111fd3fb4.svg"
+    },
+    {
+      "id": "cert-2",
+      "name": "Cisco Certified Network Professional (CCNP Enterprise)",
+      "issuer": "Cisco",
+      "issueDate": "2023-04-10",
+      "credentialId": "CCNP-102938-ASK",
+      "verifyUrl": "https://www.credly.com/org/cisco/mark/ccnp-enterprise",
+      "badgeImage": "/uploads/upload-a96c1ddae7517a66.svg"
+    },
+    {
+      "id": "cert-3",
+      "name": "Microsoft Certified: Azure Administrator Associate",
+      "issuer": "Microsoft",
+      "issueDate": "2022-11-20",
+      "expiryDate": "2024-11-20",
+      "credentialId": "AZ104-583921-ASK",
+      "verifyUrl": "https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator",
+      "badgeImage": "microsoft"
+    },
+    {
+      "id": "cert-4",
+      "name": "AWS Certified Solutions Architect – Associate",
+      "issuer": "Amazon Web Services (AWS)",
+      "issueDate": "2023-01-15",
+      "expiryDate": "2026-01-15",
+      "credentialId": "AWS-SAA-901847-ASK",
+      "verifyUrl": "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+      "badgeImage": "aws"
+    },
+    {
+      "id": "cert-5",
+      "name": "Fortinet Network Security Expert (NSE 4)",
+      "issuer": "Fortinet",
+      "issueDate": "2022-06-18",
+      "expiryDate": "2024-06-18",
+      "credentialId": "FORTI-NSE4-829374",
+      "verifyUrl": "https://training.fortinet.com/",
+      "badgeImage": "fortinet"
+    },
+    {
+      "id": "cert-6",
+      "name": "CompTIA Network+",
+      "issuer": "CompTIA",
+      "issueDate": "2021-03-10",
+      "expiryDate": "2024-03-10",
+      "credentialId": "COMP-NET-728193",
+      "verifyUrl": "https://www.comptia.org/certifications/network",
+      "badgeImage": "comptia"
+    },
+    {
+      "id": "cert-7",
+      "name": "CompTIA Security+",
+      "issuer": "CompTIA",
+      "issueDate": "2021-05-12",
+      "expiryDate": "2024-05-12",
+      "credentialId": "COMP-SEC-920193",
+      "verifyUrl": "https://www.comptia.org/certifications/security",
+      "badgeImage": "comptia"
+    },
+    {
+      "id": "cert-1780240304695",
+      "name": "ISTqb",
+      "issuer": "istqu",
+      "issueDate": "2026-05-31",
+      "credentialId": "N/A",
+      "verifyUrl": "",
+      "badgeImage": "/uploads/upload-ce33d33e44aab888.png"
+    }
+  ],
+  "contact": {
+    "email": "askshovon5207@gmail.com",
+    "phone": "+880 1712-345678",
+    "whatsapp": "+8801712345678",
+    "location": "Dhaka, Bangladesh"
+  }
+}

@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand-black: #0A0A0A;
+  --color-brand-charcoal: #121212;
+  --color-brand-navy: #111e38;
+  --color-brand-accent: #2563eb;
+  --color-brand-success: #22c55e;
+}
+
+/* Custom Base Styles */
+body {
+  background-color: #0A0A0A;
+  color: #f3f4f6;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #1f2937 #0A0A0A;
+}
+
+/* Custom Webkit scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* Glassmorphism Preset - Professional Polish */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.glass-panel-accent {
+  background: rgba(37, 99, 235, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 99, 235, 0.20);
+}
+
+.glow-blue {
+  box-shadow: 0 0 30px -5px rgba(59, 130, 246, 0.15);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+/* Continuous background space net animation grid */
+@keyframes pulseNetwork {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.12; }
+}
+
+.network-grid {
+  background-image: 
+    linear-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.07) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: pulseNetwork 10s infinite ease-in-out;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Abu Shaif Khan Portfolio",
+  "description": "A modern premium response personal portfolio website for Abu Shaif Khan, an IT & Network Specialist, featuring a dark luxury layout and a dynamic admin control panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
