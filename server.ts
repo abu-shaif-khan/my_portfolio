@@ -2,12 +2,21 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
-import { createServer as createViteServer } from "vite";
 import { DEFAULT_PORTFOLIO_DATA } from "./src/data";
 import { PortfolioData, ContactMessage } from "./src/types";
 
 const app = express();
 const PORT = 3000;
+
+const isVercel = !!process.env.VERCEL;
+
+// Memory cache for Vercel / serverless environment
+const memoryCache = {
+  portfolio: null as any,
+  messages: null as any,
+  auth: null as any,
+  sessions: {} as { [token: string]: { expiry: number } }
+};
 
 // Setup directories
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -16,41 +25,57 @@ const PORTFOLIO_FILE = path.join(DATA_DIR, "portfolio.json");
 const MESSAGES_FILE = path.join(DATA_DIR, "messages.json");
 const AUTH_FILE = path.join(DATA_DIR, "auth.json");
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+if (!isVercel) {
+  if (!fs.existsSync(DATA_DIR)) {
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    } catch (e) {
+      console.warn("Failed to create DATA_DIR:", e);
+    }
+  }
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    try {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    } catch (e) {
+      console.warn("Failed to create UPLOADS_DIR:", e);
+    }
+  }
 }
 
 // Ensure Database Files Exist
 function initDB() {
-  // 1. Portfolio data
-  if (!fs.existsSync(PORTFOLIO_FILE)) {
-    fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(DEFAULT_PORTFOLIO_DATA, null, 2), "utf8");
-    console.log("Initialized portfolio.json with default seed data");
-  }
+  if (isVercel) return; // Don't run local disk DB initialization on Vercel
 
-  // 2. Contact messages
-  if (!fs.existsSync(MESSAGES_FILE)) {
-    fs.writeFileSync(MESSAGES_FILE, JSON.stringify([], null, 2), "utf8");
-    console.log("Initialized messages.json empty list");
-  }
+  try {
+    // 1. Portfolio data
+    if (!fs.existsSync(PORTFOLIO_FILE)) {
+      fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(DEFAULT_PORTFOLIO_DATA, null, 2), "utf8");
+      console.log("Initialized portfolio.json with default seed data");
+    }
 
-  // 3. Admin Authentication File
-  if (!fs.existsSync(AUTH_FILE)) {
-    const salt = crypto.randomBytes(16).toString("hex");
-    const defaultPassword = "shaif123"; // Easy default password as requested for dynamic admin login
-    const hash = crypto.createHmac("sha256", salt).update(defaultPassword).digest("hex");
-    
-    const initialAuth = {
-      user: "askshovon5207@gmail.com",
-      passwordHash: hash,
-      salt: salt,
-      sessions: {} as { [token: string]: { expiry: number } }
-    };
-    fs.writeFileSync(AUTH_FILE, JSON.stringify(initialAuth, null, 2), "utf8");
-    console.log("Initialized auth.json with default admin credentials");
+    // 2. Contact messages
+    if (!fs.existsSync(MESSAGES_FILE)) {
+      fs.writeFileSync(MESSAGES_FILE, JSON.stringify([], null, 2), "utf8");
+      console.log("Initialized messages.json empty list");
+    }
+
+    // 3. Admin Authentication File
+    if (!fs.existsSync(AUTH_FILE)) {
+      const salt = crypto.randomBytes(16).toString("hex");
+      const defaultPassword = "shaif123"; // Easy default password as requested for dynamic admin login
+      const hash = crypto.createHmac("sha256", salt).update(defaultPassword).digest("hex");
+      
+      const initialAuth = {
+        user: "askshovon5207@gmail.com",
+        passwordHash: hash,
+        salt: salt,
+        sessions: {} as { [token: string]: { expiry: number } }
+      };
+      fs.writeFileSync(AUTH_FILE, JSON.stringify(initialAuth, null, 2), "utf8");
+      console.log("Initialized auth.json with default admin credentials");
+    }
+  } catch (err) {
+    console.warn("Failed to initialize database files on disk:", err);
   }
 }
 
@@ -65,16 +90,55 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 
 // Session authentication middleware helper
 function getAdminAuth() {
-  if (!fs.existsSync(AUTH_FILE)) return null;
-  try {
-    return JSON.parse(fs.readFileSync(AUTH_FILE, "utf8"));
-  } catch (e) {
-    return null;
+  if (memoryCache.auth) {
+    return memoryCache.auth;
   }
+  
+  let authData: any = null;
+  try {
+    if (fs.existsSync(AUTH_FILE)) {
+      authData = JSON.parse(fs.readFileSync(AUTH_FILE, "utf8"));
+    }
+  } catch (e) {
+    console.warn("Failed to read auth file:", e);
+  }
+  
+  if (!authData) {
+    const salt = crypto.randomBytes(16).toString("hex");
+    const defaultPassword = "shaif123"; // Easy default password
+    const hash = crypto.createHmac("sha256", salt).update(defaultPassword).digest("hex");
+    
+    authData = {
+      user: "askshovon5207@gmail.com",
+      passwordHash: hash,
+      salt: salt,
+      sessions: {} as { [token: string]: { expiry: number } }
+    };
+  }
+  
+  // Direct sessions to in-memory store on Vercel
+  if (!authData.sessions) {
+    authData.sessions = {};
+  }
+  if (isVercel) {
+    authData.sessions = memoryCache.sessions;
+  }
+  
+  memoryCache.auth = authData;
+  return authData;
 }
 
 function saveAdminAuth(authData: any) {
-  fs.writeFileSync(AUTH_FILE, JSON.stringify(authData, null, 2), "utf8");
+  memoryCache.auth = authData;
+  if (isVercel) {
+    memoryCache.sessions = authData.sessions;
+    return;
+  }
+  try {
+    fs.writeFileSync(AUTH_FILE, JSON.stringify(authData, null, 2), "utf8");
+  } catch (e) {
+    console.warn("Failed to write auth file to disk, using in-memory:", e);
+  }
 }
 
 function checkAdminAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -109,19 +173,40 @@ function checkAdminAuth(req: express.Request, res: express.Response, next: expre
 // 0. GET Portfolio Resume Document (Public)
 app.get("/api/portfolio/resume", (req, res) => {
   try {
-    if (fs.existsSync(PORTFOLIO_FILE)) {
-      const dataRaw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
-      const data = JSON.parse(dataRaw);
-      if (data.hero && data.hero.resumeUrl) {
-        if (data.hero.resumeUrl.startsWith("/")) {
-          const filePath = path.join(process.cwd(), data.hero.resumeUrl);
-          if (fs.existsSync(filePath)) {
-            res.setHeader("Content-Type", "application/pdf");
-            return res.sendFile(filePath);
-          }
-        } else if (data.hero.resumeUrl.startsWith("http")) {
-          return res.redirect(data.hero.resumeUrl);
+    let data: any = null;
+    if (memoryCache.portfolio) {
+      data = memoryCache.portfolio;
+    } else {
+      try {
+        if (fs.existsSync(PORTFOLIO_FILE)) {
+          const dataRaw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
+          data = JSON.parse(dataRaw);
+          memoryCache.portfolio = data;
         }
+      } catch (e) {
+        console.warn("Failed to read portfolio file:", e);
+      }
+    }
+
+    if (data && data.hero && data.hero.resumeUrl) {
+      if (data.hero.resumeUrl.startsWith("/")) {
+        const filePath = path.join(process.cwd(), data.hero.resumeUrl);
+        if (fs.existsSync(filePath)) {
+          res.setHeader("Content-Type", "application/pdf");
+          return res.sendFile(filePath);
+        }
+      } else if (data.hero.resumeUrl.startsWith("http") || data.hero.resumeUrl.startsWith("data:")) {
+        if (data.hero.resumeUrl.startsWith("data:")) {
+          const match = data.hero.resumeUrl.match(/^data:([^;]+);base64,(.+)$/);
+          if (match) {
+            const contentType = match[1];
+            const base64Data = match[2];
+            const buffer = Buffer.from(base64Data, "base64");
+            res.setHeader("Content-Type", contentType);
+            return res.send(buffer);
+          }
+        }
+        return res.redirect(data.hero.resumeUrl);
       }
     }
     
@@ -157,8 +242,19 @@ Generated dynamically via Portfolio Platform. Upload the customized PDF format f
 // 1. GET Portfolio Data
 app.get("/api/portfolio", (req, res) => {
   try {
-    const dataRaw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
-    const data = JSON.parse(dataRaw);
+    if (memoryCache.portfolio) {
+      return res.json(memoryCache.portfolio);
+    }
+    let data = DEFAULT_PORTFOLIO_DATA;
+    try {
+      if (fs.existsSync(PORTFOLIO_FILE)) {
+        const dataRaw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
+        data = JSON.parse(dataRaw);
+      }
+    } catch (err) {
+      console.warn("Failed to read portfolio file, using default data:", err);
+    }
+    memoryCache.portfolio = data;
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Failed to read portfolio config." });
@@ -173,7 +269,14 @@ app.post("/api/portfolio", checkAdminAuth, (req, res) => {
       return res.status(400).json({ error: "Invalid portfolio data structure schema." });
     }
 
-    fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(incomingData, null, 2), "utf8");
+    memoryCache.portfolio = incomingData;
+
+    try {
+      fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(incomingData, null, 2), "utf8");
+    } catch (writeErr) {
+      console.warn("Failed to save portfolio to disk, updating in-memory only:", writeErr);
+    }
+    
     res.json({ message: "Portfolio successfully updated!" });
   } catch (error) {
     res.status(500).json({ error: "Failed to save portfolio values." });
@@ -188,8 +291,20 @@ app.post("/api/contact/message", (req, res) => {
       return res.status(400).json({ error: "All fields are required. Please check input." });
     }
 
-    const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
-    const messagesList: ContactMessage[] = JSON.parse(messagesRaw);
+    let messagesList: ContactMessage[] = [];
+    if (memoryCache.messages) {
+      messagesList = memoryCache.messages;
+    } else {
+      try {
+        if (fs.existsSync(MESSAGES_FILE)) {
+          const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
+          messagesList = JSON.parse(messagesRaw);
+        }
+      } catch (readErr) {
+        console.warn("Failed to read messages file:", readErr);
+      }
+      memoryCache.messages = messagesList;
+    }
 
     const newMessage: ContactMessage = {
       id: crypto.randomBytes(8).toString("hex"),
@@ -202,7 +317,13 @@ app.post("/api/contact/message", (req, res) => {
     };
 
     messagesList.unshift(newMessage); // newest first
-    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messagesList, null, 2), "utf8");
+    memoryCache.messages = messagesList;
+
+    try {
+      fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messagesList, null, 2), "utf8");
+    } catch (writeErr) {
+      console.warn("Failed to save messages list to disk, updating in-memory only:", writeErr);
+    }
 
     res.json({ success: true, message: "Your message has been sent successfully!" });
   } catch (error) {
@@ -213,8 +334,19 @@ app.post("/api/contact/message", (req, res) => {
 // 4. GET Admin Messages List (Admin only)
 app.get("/api/admin/messages", checkAdminAuth, (req, res) => {
   try {
-    const dataRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
-    const messages = JSON.parse(dataRaw);
+    if (memoryCache.messages) {
+      return res.json(memoryCache.messages);
+    }
+    let messages: ContactMessage[] = [];
+    try {
+      if (fs.existsSync(MESSAGES_FILE)) {
+        const dataRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
+        messages = JSON.parse(dataRaw);
+      }
+    } catch (err) {
+      console.warn("Failed to read messages file:", err);
+    }
+    memoryCache.messages = messages;
     res.json(messages);
   } catch (err) {
     res.status(500).json({ error: "Failed to read logs." });
@@ -225,8 +357,20 @@ app.get("/api/admin/messages", checkAdminAuth, (req, res) => {
 app.post("/api/admin/messages/:id/read", checkAdminAuth, (req, res) => {
   try {
     const { id } = req.params;
-    const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
-    const messagesList: ContactMessage[] = JSON.parse(messagesRaw);
+    
+    let messagesList: ContactMessage[] = [];
+    if (memoryCache.messages) {
+      messagesList = memoryCache.messages;
+    } else {
+      try {
+        if (fs.existsSync(MESSAGES_FILE)) {
+          const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
+          messagesList = JSON.parse(messagesRaw);
+        }
+      } catch (err) {
+        console.warn("Failed to read messages:", err);
+      }
+    }
 
     const targetIndex = messagesList.findIndex(m => m.id === id);
     if (targetIndex === -1) {
@@ -234,7 +378,14 @@ app.post("/api/admin/messages/:id/read", checkAdminAuth, (req, res) => {
     }
 
     messagesList[targetIndex].status = "read";
-    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messagesList, null, 2), "utf8");
+    memoryCache.messages = messagesList;
+
+    try {
+      fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messagesList, null, 2), "utf8");
+    } catch (writeErr) {
+      console.warn("Failed to save read status to disk, updating in-memory only:", writeErr);
+    }
+    
     res.json({ message: "Message marked as read." });
   } catch (error) {
     res.status(500).json({ error: "Failed to update record." });
@@ -245,15 +396,34 @@ app.post("/api/admin/messages/:id/read", checkAdminAuth, (req, res) => {
 app.delete("/api/admin/messages/:id", checkAdminAuth, (req, res) => {
   try {
     const { id } = req.params;
-    const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
-    const messagesList: ContactMessage[] = JSON.parse(messagesRaw);
+    
+    let messagesList: ContactMessage[] = [];
+    if (memoryCache.messages) {
+      messagesList = memoryCache.messages;
+    } else {
+      try {
+        if (fs.existsSync(MESSAGES_FILE)) {
+          const messagesRaw = fs.readFileSync(MESSAGES_FILE, "utf8");
+          messagesList = JSON.parse(messagesRaw);
+        }
+      } catch (err) {
+        console.warn("Failed to read messages:", err);
+      }
+    }
 
     const filtered = messagesList.filter(m => m.id !== id);
     if (filtered.length === messagesList.length) {
       return res.status(404).json({ error: "Message not found." });
     }
 
-    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(filtered, null, 2), "utf8");
+    memoryCache.messages = filtered;
+
+    try {
+      fs.writeFileSync(MESSAGES_FILE, JSON.stringify(filtered, null, 2), "utf8");
+    } catch (writeErr) {
+      console.warn("Failed to save deleted message list to disk, updating in-memory only:", writeErr);
+    }
+    
     res.json({ message: "Message deleted successfully." });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete message." });
@@ -344,6 +514,11 @@ app.post("/api/admin/upload", checkAdminAuth, (req, res) => {
       return res.status(400).json({ error: "Invalid upload payload components." });
     }
 
+    if (isVercel) {
+      console.log("On Vercel: returning base64 URI directly as fallback");
+      return res.json({ url: data });
+    }
+
     // Split base64 scheme out
     const match = data.match(/^data:([^;]+);base64,(.+)$/);
     if (!match) {
@@ -361,10 +536,14 @@ app.post("/api/admin/upload", checkAdminAuth, (req, res) => {
     const fileName = `upload-${crypto.randomBytes(8).toString("hex")}${ext}`;
     const filePath = path.join(UPLOADS_DIR, fileName);
 
-    fs.writeFileSync(filePath, imageBuffer);
-    console.log(`Successfully saved uploaded file to ${filePath}`);
-
-    res.json({ url: `/uploads/${fileName}` });
+    try {
+      fs.writeFileSync(filePath, imageBuffer);
+      console.log(`Successfully saved uploaded file to ${filePath}`);
+      res.json({ url: `/uploads/${fileName}` });
+    } catch (writeErr) {
+      console.warn("Write to filesystem failed, returning base64 directly as fallback:", writeErr);
+      res.json({ url: data });
+    }
   } catch (error) {
     console.error("Upload error details: ", error);
     res.status(500).json({ error: "Failed to store uploaded file." });
@@ -375,6 +554,7 @@ app.post("/api/admin/upload", checkAdminAuth, (req, res) => {
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     console.log("Starting server in development mode with Vite integration");
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -394,4 +574,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!isVercel) {
+  startServer();
+}
+
+export default app;
